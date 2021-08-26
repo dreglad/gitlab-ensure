@@ -1,4 +1,4 @@
-build:
+build-job:
   image: golang:1.16-buster
   script:
     - go mod download
@@ -9,6 +9,6 @@ build:
 
 run:
   image: alpine:3
-  needs: build
+  needs: [build]
   script:
     - ./build/app
