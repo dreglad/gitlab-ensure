@@ -16,4 +16,5 @@ run:
   stage: run
   image: alpine:3
   script:
+    - ls -lah *
     - ./build/app
