@@ -9,6 +9,8 @@ build:
 
 run:
   image: alpine:3
-  needs: [build]
+  needs:
+    - job: build
+      artifacts: true
   script:
     - ./build/app
