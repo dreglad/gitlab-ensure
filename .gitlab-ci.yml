@@ -10,12 +10,10 @@ build:
     - go build -o build/app
   artifacts:
     paths:
-      - build/
+      - build/app
 
 run:
   stage: run
   image: alpine:3
-  needs:
-    - build
   script:
     - ./build/app

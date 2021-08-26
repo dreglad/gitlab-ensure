@@ -19,14 +19,12 @@ func init() {
 	url := os.Getenv("GITLAB_URL")
 	token := os.Getenv("GITLAB_TOKEN")
 	if token == "" {
-		fmt.Printf("Token required in env as GITLAB_TOKEN")
-		os.Exit(1)
+		handleError(fmt.Errorf("GITLAB_TOKEN is not set"))
 	}
 
 	git, err := gitlab.NewClient(token, gitlab.WithBaseURL(url))
 	if err != nil {
-		fmt.Printf("error creating GitLab client: %v", err)
-		os.Exit(1)
+		handleError(fmt.Errorf("creating GitLab client: %v", err))
 	}
 
 	glClient = git
@@ -49,7 +47,7 @@ func main() {
 	}()
 
 	for project := range ch {
-		fmt.Println("Project", project.Name)
+		fmt.Printf("Updated project %v", project.Name)
 	}
 }
 
@@ -59,17 +57,22 @@ func ensureProject(pid string, v *gitlab.VisibilityValue, ch chan *gitlab.Projec
 	getOpt := &gitlab.GetProjectOptions{}
 	p, _, err := glClient.Projects.GetProject(pid, getOpt)
 	if err != nil {
-		return fmt.Errorf("error getting project: %v", err)
+		return fmt.Errorf("getting project: %v", err)
 	}
 
 	if p.Visibility != *v {
 		editOpt := &gitlab.EditProjectOptions{Visibility: v}
 		p, _, err = glClient.Projects.EditProject(p.ID, editOpt)
 		if err != nil {
-			return fmt.Errorf("error editing project: %v", err)
+			return fmt.Errorf("editing project: %v", err)
 		}
 		ch <- p
 	}
 
 	return nil
+}
+
+func handleError(err error) {
+	fmt.Print(err)
+	os.Exit(1)
 }
