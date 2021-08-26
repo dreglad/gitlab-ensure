@@ -5,7 +5,7 @@ build:
     - go build -o build/app
   artifacts:
     paths:
-      - build
+      - build/
 
 run:
   image: alpine:3
