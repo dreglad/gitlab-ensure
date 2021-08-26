@@ -2,7 +2,7 @@ build:
   image: golang:1.16-buster
   script:
     - go mod download
-    - CGO_ENABLED=0 go build -o build/app
+    - go build -ldflags "-linkmode external -extldflags -static" -o build/app
   artifacts:
     paths:
       - build/
