@@ -10,7 +10,7 @@ build:
     - go build -o build/app
   artifacts:
     paths:
-      - build/app
+      - build/
 
 run:
   stage: run
