@@ -8,7 +8,7 @@ build:
       - build/
 
 run:
-  image: alpine:3
+  image: scratch
   needs: [build]
   script:
     - build/app
