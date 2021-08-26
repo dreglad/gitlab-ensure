@@ -9,5 +9,6 @@ build:
 
 run:
   image: alpine:3
+  needs: [build]
   script:
     - build/app
