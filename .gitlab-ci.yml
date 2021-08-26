@@ -16,5 +16,6 @@ run:
   stage: run
   image: alpine:3
   script:
-    - ls -lah
+    - ls -lah build
+    - sleep 500
     - build/app
