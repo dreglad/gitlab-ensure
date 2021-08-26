@@ -1,21 +1,13 @@
-stages:
-  - build
-  - run
-
 build:
-  stage: build
   image: golang:1.16-buster
   script:
     - go mod download
-    - go build -o build/app
+    - CGO_ENABLED=0 go build -o build/app
   artifacts:
     paths:
       - build/
 
 run:
-  stage: run
   image: alpine:3
   script:
-    - ls -lah build
-    - sleep 500
     - build/app
