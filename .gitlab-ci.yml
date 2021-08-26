@@ -8,7 +8,7 @@ build:
       - build
 
 run:
-  image: gcr.io/distroless/base-debian10
-  needs: [build]
+  image: alpine:3
+  needs: build
   script:
-    - /build/app
+    - ./build/app
