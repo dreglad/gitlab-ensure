@@ -11,4 +11,4 @@ run:
   image: gcr.io/distroless/base-debian10
   needs: [build]
   script:
-    - ./build/app
+    - /build/app
