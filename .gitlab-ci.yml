@@ -1,0 +1,14 @@
+build:
+  image: golang:1.16-buster
+  script:
+    - go mod download
+    - go build -o build/app
+  artifacts:
+    paths:
+      - build
+
+run:
+  image: gcr.io/distroless/base-debian10
+  needs: [build]
+  script:
+    - ./build/app
