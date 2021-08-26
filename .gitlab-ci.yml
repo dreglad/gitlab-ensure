@@ -1,4 +1,4 @@
-build-job:
+build:
   image: golang:1.16-buster
   script:
     - go mod download
