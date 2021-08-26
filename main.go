@@ -11,13 +11,17 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-var glClient *gitlab.Client
+var (
+	glClient *gitlab.Client
+	wg       sync.WaitGroup
+)
 
 func init() {
 	godotenv.Load()
 
 	url := os.Getenv("GITLAB_URL")
 	token := os.Getenv("GITLAB_TOKEN")
+
 	if token == "" {
 		handleError(fmt.Errorf("GITLAB_TOKEN is not set"))
 	}
@@ -32,13 +36,9 @@ func init() {
 
 func main() {
 	ch := make(chan *gitlab.Project)
-	var wg sync.WaitGroup
-	for _, pid := range strings.Split(os.Getenv("KNOWN_OPEN"), ",") {
+	for _, pid := range splitCommas(os.Getenv("KNOWN_OPEN")) {
 		wg.Add(1)
-		go ensureProject(
-			strings.Trim(pid, " "),
-			gitlab.Visibility("public"),
-			ch, &wg)
+		go ensureProject(pid, "public", ch)
 	}
 
 	go func() {
@@ -47,31 +47,38 @@ func main() {
 	}()
 
 	for project := range ch {
-		fmt.Printf("Updated project %v", project.Name)
+		fmt.Printf("Updated project %v\n", project.Name)
 	}
 }
 
-func ensureProject(pid string, v *gitlab.VisibilityValue, ch chan *gitlab.Project, wg *sync.WaitGroup) error {
-	defer (*wg).Done()
+// Ensure project has the desired visibility.
+func ensureProject(pid string, v gitlab.VisibilityValue, ch chan *gitlab.Project) error {
+	defer wg.Done()
 
 	getOpt := &gitlab.GetProjectOptions{}
-	p, _, err := glClient.Projects.GetProject(pid, getOpt)
+	proj, _, err := glClient.Projects.GetProject(pid, getOpt)
 	if err != nil {
-		return fmt.Errorf("getting project: %v", err)
+		return fmt.Errorf("when getting project: %v", err)
 	}
 
-	if p.Visibility != *v {
-		editOpt := &gitlab.EditProjectOptions{Visibility: v}
-		p, _, err = glClient.Projects.EditProject(p.ID, editOpt)
+	if proj.Visibility != v {
+		editOpt := &gitlab.EditProjectOptions{Visibility: gitlab.Visibility(v)}
+		proj, _, err = glClient.Projects.EditProject(proj.ID, editOpt)
 		if err != nil {
-			return fmt.Errorf("editing project: %v", err)
+			return fmt.Errorf("when editing project: %v", err)
 		}
-		ch <- p
+		ch <- proj
 	}
 
 	return nil
 }
 
+// Split string on commas and trim any whitespace.
+func splitCommas(s string) []string {
+	return strings.Split(strings.ReplaceAll(s, " ", ""), ",")
+}
+
+// Print error to stoud and exit with non-zero exit code.
 func handleError(err error) {
 	fmt.Print(err)
 	os.Exit(1)

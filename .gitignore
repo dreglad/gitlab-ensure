@@ -1,5 +1,7 @@
 .env
 /gitlab-ensure
+/build
+/dist
 
 # Binaries for programs and plugins
 *.exe
